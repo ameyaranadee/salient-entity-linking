@@ -39,9 +39,6 @@ def main(ground_truth_path, sel_output_path):
         #salient entities (after linking) output for current article    
         sel_article_predicted_salient_entities = sel_output_df[sel_output_df["text"] == text]["predicted_wiki_ID"].to_list()
 
-        #casting from float
-        # sel_article_predicted_salient_entities = [int(x) for x in sel_article_predicted_salient_entities]
-
         #looping over ground truth salient entities for current article
         for ground_truth_salient_entity in ground_truth_salient_entities:
             #If current ground truth salient wikipedia ID is in list of predicted salient wikipedia ID's for current article, increase precision, recall
