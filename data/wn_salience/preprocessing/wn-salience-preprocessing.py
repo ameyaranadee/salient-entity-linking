@@ -292,9 +292,37 @@ def fetch_wiki_page_id(wiki_url):
             else:
                 return(int(page_id))
 
+#Used for adding Wikidata Q IDs to WN-Salience ground truth by mapping Wikipedia page IDs to respective Q ID 
+def add_q_ids():
+
+    headers = {
+        "User-Agent": "MyWikidataMapper/1.0 (your_email@example.com)"  # <-- required!
+    }
+
+    for train_val_test in ["test"]:
+
+        wns_df = pd.read_csv(f"/work/pi_wenlongzhao_umass_edu/8/696-detecting-salient-entities/data/WN_csv_new/WNS_{train_val_test}_KB.csv")
+        wiki_ids = wns_df["wiki_ID"].to_list()
+
+        for idx, wiki_id in enumerate(wiki_ids):
+            url = f"https://en.wikipedia.org/w/api.php?action=query&pageids={wiki_id}&prop=pageprops&format=json"
+
+            response = requests.get(url, headers=headers)
+            data = response.json()
+
+            qid = data["query"]["pages"][str(wiki_id)]["pageprops"]["wikibase_item"]
+            #if not mapped correctly for some reason
+            if not qid:
+                mapped_q_ids.append(None)
+            mapped_q_ids.append(qid)
+
+        test_df["Q_ID"] = mapped_q_ids
+        test_df.to_csv(f"/work/pi_wenlongzhao_umass_edu/8/james/salient-entity-linking-with-llm/data/wn_salience/splits/WNS_{train_val_test}_QID_KB.csv")
+
 
 if __name__ == "__main__":
 
     split_wn_salience_xml_train_val_test()
     train_val_test_xml_to_json()
     json_to_csv()
+    add_q_ids()
